@@ -131,6 +131,7 @@ void mainLoop()
 				sendPacket(pkt,i,RELEASE_G);
 			}
 			changeState(InRun);
+			delete(pkt);
 			break;
 		}
 		

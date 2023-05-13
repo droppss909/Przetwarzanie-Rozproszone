@@ -66,6 +66,7 @@ void *startKomWatek(void *ptr)
         }
         case RELEASE_G:
         {
+            std::priority_queue<q_item_t> tempQueue;
             pthread_mutex_lock(&guideMut);
             for(std::deque<q_item_t>::iterator it = guideQueue.begin(); it != guideQueue.end(); ++it){
                 if(it->rank == pakiet.src){
