@@ -57,7 +57,8 @@ int main(int argc, char **argv)
     inicjuj_typ_pakietu();
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    color = (rank % 2) ? Blue : Purple;
+    if (rank%3==0 && rank!=0 ){ color=Cleaner;}
+    else {color = (rank % 2) ? Blue : Purple;}
 
     pthread_create(&threadKom, NULL, startKomWatek, 0);
     mainLoop();

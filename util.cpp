@@ -45,6 +45,7 @@ void inicjuj_typ_pakietu()
     offsets[1] = offsetof(packet_t, src);
     offsets[2] = offsetof(packet_t, hotelNo);
     offsets[3] = offsetof(packet_t, color);
+    
 
     MPI_Type_create_struct(NITEMS, blocklengths, offsets, typy, &MPI_PAKIET_T);
 

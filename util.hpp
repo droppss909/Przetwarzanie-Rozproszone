@@ -10,7 +10,8 @@
 typedef enum
 {
     Blue,
-    Purple
+    Purple,
+    Cleaner
 } color_t;
 
 // Element kolejki
@@ -35,6 +36,7 @@ typedef struct
     int src;
     int hotelNo; /* przykładowe pole z danymi; można zmienić nazwę na bardziej pasującą */
     color_t color;
+    
 } packet_t;
 /* packet_t ma trzy pola, więc NITEMS=3. Wykorzystane w inicjuj_typ_pakietu */
 #define NITEMS 4
@@ -63,7 +65,8 @@ typedef enum
     Rest,
     WaitHotel,
     WaitGuide,
-    Trip
+    Trip,
+    Cleaning
 } state_t;
 
 extern state_t stan;
