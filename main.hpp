@@ -20,9 +20,11 @@ extern int rank;
 extern int size;
 extern int lamport;
 extern int ackCount;
+extern int ackCount_g;
 extern pthread_t threadKom;
 // extern std::priority_queue<q_item_t> hotelQueues[H];
 extern std::deque<q_item_t> hotelQueues[H];
+extern std::deque<q_item_t> guideQueue;
 extern color_t color;
 
 #ifdef DEBUG

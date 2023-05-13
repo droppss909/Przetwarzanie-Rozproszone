@@ -16,13 +16,15 @@ state_t stan = InRun;
 pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t lamportMut = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t queueMut = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t guideMut = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t ackMut = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t ackMut_g= PTHREAD_MUTEX_INITIALIZER;
 
 struct tagNames_t
 {
     const char *name;
     int tag;
-} tagNames[] = {{"pakiet aplikacyjny", APP_PKT}, {"finish", FINISH}, {"potwierdzenie", ACK}, {"prośbę o sekcję krytyczną", REQUEST}, {"zwolnienie sekcji krytycznej", RELEASE}};
+} tagNames[] = {{"pakiet aplikacyjny", APP_PKT}, {"finish", FINISH}, {"potwierdzenie", ACK}, {"prośbę o sekcję krytyczną", REQUEST}, {"zwolnienie sekcji krytycznej", RELEASE}, {"potwierdzenie (guide)", ACK_G},{"prosba o przewodnika", REQUEST_G}, {"Zezwolenie na podroz", RELEASE_G}};
 
 const char *const tag2string(int tag)
 {
@@ -45,6 +47,7 @@ void inicjuj_typ_pakietu()
     offsets[1] = offsetof(packet_t, src);
     offsets[2] = offsetof(packet_t, hotelNo);
     offsets[3] = offsetof(packet_t, color);
+
     
 
     MPI_Type_create_struct(NITEMS, blocklengths, offsets, typy, &MPI_PAKIET_T);

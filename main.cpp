@@ -4,8 +4,10 @@
 
 int rank, size, lamport;
 int ackCount = 0;
+int ackCount_g=0;
 pthread_t threadKom;
 std::deque<q_item_t> hotelQueues[H];
+std::deque<q_item_t> guideQueue;
 color_t color;
 
 void finalizuj()

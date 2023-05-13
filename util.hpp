@@ -5,6 +5,7 @@
 // Parametry programu
 #define H 1
 #define R 2
+#define G 2
 
 // Kolory Kosmitów
 typedef enum
@@ -39,15 +40,18 @@ typedef struct
     
 } packet_t;
 /* packet_t ma trzy pola, więc NITEMS=3. Wykorzystane w inicjuj_typ_pakietu */
-#define NITEMS 4
+#define NITEMS 5
 
 /* Typy wiadomości */
 /* TYPY PAKIETÓW */
 #define ACK 1
 #define REQUEST 2
 #define RELEASE 3
-#define APP_PKT 4
-#define FINISH 5
+#define ACK_G 4
+#define REQUEST_G 5
+#define RELEASE_G 6
+#define APP_PKT 7
+#define FINISH 8
 
 extern MPI_Datatype MPI_PAKIET_T;
 void inicjuj_typ_pakietu();
@@ -73,7 +77,9 @@ extern state_t stan;
 extern pthread_mutex_t stateMut;
 extern pthread_mutex_t lamportMut;
 extern pthread_mutex_t queueMut;
+extern pthread_mutex_t guideMut;
 extern pthread_mutex_t ackMut;
+extern pthread_mutex_t ackMut_g;
 
 void changeState(state_t);
 int cmp(q_item_t const &lhs, q_item_t const &rhs);
