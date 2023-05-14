@@ -19,7 +19,7 @@ void *startKomWatek(void *ptr)
         switch (status.MPI_TAG)
         {
         case REQUEST_H:
-            // println("dostałem REQUEST_H[%d] od %d", pakiet.hotelNo, pakiet.src);
+            debug("dostałem REQUEST_H[%d] od %d", pakiet.hotelNo, pakiet.src);
             hotelMut.lock();
             hotelQueues[pakiet.hotelNo].push_back(q_item_t{pakiet.ts, pakiet.color, pakiet.src});
             std::sort(hotelQueues[pakiet.hotelNo].begin(), hotelQueues[pakiet.hotelNo].end());
@@ -29,13 +29,13 @@ void *startKomWatek(void *ptr)
         case ACK:
             ackMut.lock();
             ackCount++;
-            // println("Dostałem ACK od %d, mam już %d", status.MPI_SOURCE, ackCount);
+            debug("Dostałem ACK od %d, mam już %d", status.MPI_SOURCE, ackCount);
             ackMut.unlock();
             ackCond.notify_all();
             break;
         case RELEASE_H:
         {
-            // println("Dostałem RELEASE_H[%d] od [%d]", pakiet.hotelNo, pakiet.src);
+            debug("Dostałem RELEASE_H[%d] od [%d]", pakiet.hotelNo, pakiet.src);
             hotelMut.lock();
             for (std::deque<q_item_t>::iterator it = hotelQueues[pakiet.hotelNo].begin(); it != hotelQueues[pakiet.hotelNo].end(); ++it)
             {
@@ -51,7 +51,7 @@ void *startKomWatek(void *ptr)
         }
         case REQUEST_G:
         {
-            // println("Dostałem REQUEST_G od [%d]", pakiet.src);
+            debug("Dostałem REQUEST_G od [%d]", pakiet.src);
             guideMut.lock();
             guideQueue.push_back(q_item_t{pakiet.ts, pakiet.color, pakiet.src});
             std::sort(guideQueue.begin(), guideQueue.end());
@@ -61,7 +61,7 @@ void *startKomWatek(void *ptr)
         }
         case RELEASE_G:
         {
-            // println("Dostałem RELEASE_G od [%d]", pakiet.src);
+            debug("Dostałem RELEASE_G od [%d]", pakiet.src);
             guideMut.lock();
             for (std::deque<q_item_t>::iterator it = guideQueue.begin(); it != guideQueue.end(); ++it)
             {

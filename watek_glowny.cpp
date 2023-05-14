@@ -77,7 +77,7 @@ void mainLoop()
 		case Cleaning:
 		{
 			println("Sprztam hotel: %d", hotelNo);
-			sleep(1);
+			sleep(3);
 			println("Wychodzę z sekcji krytycznej");
 			packet_t *pkt = new packet_t;
 			pkt->hotelNo = hotelNo;
@@ -109,8 +109,8 @@ void mainLoop()
 		case Trip:
 		{
 			println("Jestem na wycieczce");
-			sleep(2);
-			println("wychodze z sekcji rytycznej");
+			sleep(3);
+			println("wychodze z sekcji krytycznej");
 			packet_t *pkt = new packet_t;
 			pkt->hotelNo = hotelNo;
 			for (int i = 0; i <= size - 1; i++)

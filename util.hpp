@@ -5,8 +5,8 @@
 #include <condition_variable>
 
 // Parametry programu
-#define H 1
-#define R 2
+#define H 5
+#define R 3
 #define G 2
 
 // Kolory Kosmitów
