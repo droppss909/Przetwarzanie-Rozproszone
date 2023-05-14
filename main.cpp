@@ -11,11 +11,6 @@ color_t color;
 
 void finalizuj()
 {
-    pthread_mutex_destroy(&stateMut);
-    pthread_mutex_destroy(&lamportMut);
-    pthread_mutex_destroy(&hotelMut);
-    pthread_mutex_destroy(&ackMut);
-    pthread_mutex_destroy(&guideMut);
     /* Czekamy, aż wątek potomny się zakończy */
     println("czekam na wątek \"komunikacyjny\"\n");
     pthread_join(threadKom, NULL);

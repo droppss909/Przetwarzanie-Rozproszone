@@ -1,5 +1,7 @@
 #include "main.hpp"
+
 #include "watek_glowny.hpp"
+
 #include <queue>
 
 void mainLoop()
@@ -7,6 +9,7 @@ void mainLoop()
 	srandom(rank);
 	int perc;
 	int hotelNo;
+	int threshold = color == Cleaner ? 15 : 40;
 
 	while (stan != InFinish)
 	{
@@ -14,18 +17,16 @@ void mainLoop()
 		{
 		case Rest:
 			perc = random() % 100;
-			if (color == Cleaner)
-				sleep(5);
-			if (perc < 80)
+			if (perc < threshold)
 			{
 				hotelNo = random() % H;
 				println("Ubiegam się o miejsce w hotelu %d", hotelNo);
 				packet_t *pkt = new packet_t;
 				pkt->hotelNo = hotelNo;
 				pkt->color = color;
-				pthread_mutex_lock(&ackMut);
+				ackMut.lock();
 				ackCount = 0;
-				pthread_mutex_unlock(&ackMut);
+				ackMut.unlock();
 				for (int i = 0; i <= size - 1; i++)
 					sendPacket(pkt, i, REQUEST_H);
 				changeState(WaitHotel);
@@ -33,41 +34,41 @@ void mainLoop()
 			}
 			break;
 		case WaitHotel:
-			pthread_mutex_lock(&ackMut);
-			if (ackCount == size)
-			{
-				pthread_mutex_lock(&hotelMut);
-				for (unsigned long i = 0; i < hotelQueues[hotelNo].size() && i < R; i++)
-				{
-					if (hotelQueues[hotelNo].at(i).rank == rank)
-					{
-						if (color == Cleaner)
-							changeState(Cleaning);
-						else
-							changeState(InHotel);
-						break;
-					}
-					if (hotelQueues[hotelNo].at(i).color != color)
-					{
-						break;
-					}
-				}
-				pthread_mutex_unlock(&hotelMut);
-			}
-			pthread_mutex_unlock(&ackMut);
+		{
+			std::unique_lock<std::mutex> ackLock{
+				ackMut};
+			ackCond.wait(ackLock, [&]()
+						 { return ackCount == size; });
+			ackLock.unlock();
+
+			std::unique_lock<std::mutex> hotelLock{
+				hotelMut};
+			hotelCond.wait(hotelLock, [&]()
+						   {
+							   for (unsigned long i = 0; i < hotelQueues[hotelNo].size() && i < R; i++)
+								   if (hotelQueues[hotelNo].at(i).rank == rank)
+									   return true;
+								   else if (hotelQueues[hotelNo].at(i).color != color)
+									   return false;
+
+							   return false; });
+
+			if (color == Cleaner)
+				changeState(Cleaning);
+			else
+				changeState(InHotel);
 			break;
+		}
 		case InHotel:
 		{
 			// tutaj zapewne jakiś muteks albo zmienna warunkowa
 			println("Jestem w hotelu %d i ubiegam sie o przewodnika", hotelNo);
-			pthread_mutex_lock(&ackMut);
+			ackMut.lock();
 			ackCount = 0;
-			pthread_mutex_unlock(&ackMut);
+			ackMut.unlock();
 			packet_t *pkt = new packet_t;
 			for (int i = 0; i <= size - 1; i++)
-			{
 				sendPacket(pkt, i, REQUEST_G);
-			}
 			changeState(WaitGuide);
 			delete (pkt);
 
@@ -88,21 +89,22 @@ void mainLoop()
 		}
 		case WaitGuide:
 		{
-			pthread_mutex_lock(&ackMut);
-			if (ackCount == size)
-			{
-				pthread_mutex_lock(&guideMut);
-				for (unsigned long i = 0; i < guideQueue.size() && i < G; i++)
-				{
-					if (guideQueue.at(i).rank == rank)
-					{
-						changeState(Trip);
-						break;
-					}
-				}
-				pthread_mutex_unlock(&guideMut);
-			}
-			pthread_mutex_unlock(&ackMut);
+			std::unique_lock<std::mutex> ackLock{
+				ackMut};
+			ackCond.wait(ackLock, [&]()
+						 { return ackCount == size; });
+			ackLock.unlock();
+
+			std::unique_lock<std::mutex> guideLock{
+				guideMut};
+			hotelCond.wait(guideLock, [&]()
+						   {
+							   for (unsigned long i = 0; i < guideQueue.size() && i < G; i++)
+								   if (guideQueue.at(i).rank == rank)
+									   return true;
+
+							   return false; });
+			changeState(Trip);
 		}
 		case Trip:
 		{

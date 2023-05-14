@@ -13,12 +13,14 @@ state_t stan = Rest;
  * procesu wątki współdzielą zmienne - więc dostęp do nich powinien
  * być obwarowany muteksami
  */
-pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t lamportMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t hotelMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t guideMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t ackMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t ackMut_g = PTHREAD_MUTEX_INITIALIZER;
+std::mutex stateMut;
+std::mutex lamportMut;
+std::mutex hotelMut;
+std::mutex guideMut;
+std::mutex ackMut;
+std::condition_variable ackCond;
+std::condition_variable hotelCond;
+std::condition_variable guideCond;
 
 struct tagNames_t
 {
@@ -63,9 +65,9 @@ void sendPacket(packet_t *pkt, int destination, int tag)
         freepkt = true;
     }
     pkt->src = rank;
-    pthread_mutex_lock(&lamportMut);
+    lamportMut.lock();
     pkt->ts = ++lamport;
-    pthread_mutex_unlock(&lamportMut);
+    lamportMut.unlock();
     MPI_Send(pkt, 1, MPI_PAKIET_T, destination, tag, MPI_COMM_WORLD);
     debug("Wysyłam %s do %d\n", tag2string(tag), destination);
     if (freepkt)
@@ -74,20 +76,12 @@ void sendPacket(packet_t *pkt, int destination, int tag)
 
 void changeState(state_t newState)
 {
-    pthread_mutex_lock(&stateMut);
+    stateMut.lock();
     if (stan == InFinish)
     {
-        pthread_mutex_unlock(&stateMut);
+        stateMut.unlock();
         return;
     }
     stan = newState;
-    pthread_mutex_unlock(&stateMut);
-}
-
-int cmp(q_item_t const &lhs, q_item_t const &rhs)
-{
-    if (lhs.ts != rhs.ts)
-        return lhs.ts < rhs.ts;
-    else
-        return lhs.rank > rhs.rank;
+    stateMut.unlock();
 }

@@ -1,6 +1,8 @@
 #ifndef UTILH
 #define UTILH
 #include "main.hpp"
+#include <mutex>
+#include <condition_variable>
 
 // Parametry programu
 #define H 1
@@ -68,11 +70,14 @@ typedef enum
 
 extern state_t stan;
 
-extern pthread_mutex_t stateMut;
-extern pthread_mutex_t lamportMut;
-extern pthread_mutex_t hotelMut;
-extern pthread_mutex_t guideMut;
-extern pthread_mutex_t ackMut;
+extern std::mutex stateMut;
+extern std::mutex lamportMut;
+extern std::mutex hotelMut;
+extern std::mutex guideMut;
+extern std::mutex ackMut;
+extern std::condition_variable ackCond;
+extern std::condition_variable hotelCond;
+extern std::condition_variable guideCond;
 
 void changeState(state_t);
 int cmp(q_item_t const &lhs, q_item_t const &rhs);
