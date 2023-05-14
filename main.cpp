@@ -4,7 +4,6 @@
 
 int rank, size, lamport;
 int ackCount = 0;
-int ackCount_g=0;
 pthread_t threadKom;
 std::deque<q_item_t> hotelQueues[H];
 std::deque<q_item_t> guideQueue;
@@ -14,10 +13,9 @@ void finalizuj()
 {
     pthread_mutex_destroy(&stateMut);
     pthread_mutex_destroy(&lamportMut);
-    pthread_mutex_destroy(&queueMut);
+    pthread_mutex_destroy(&hotelMut);
     pthread_mutex_destroy(&ackMut);
     pthread_mutex_destroy(&guideMut);
-    pthread_mutex_destroy(&ackMut_g);
     /* Czekamy, aż wątek potomny się zakończy */
     println("czekam na wątek \"komunikacyjny\"\n");
     pthread_join(threadKom, NULL);
@@ -61,8 +59,23 @@ int main(int argc, char **argv)
     inicjuj_typ_pakietu();
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    if (rank%3==0 && rank!=0 ){ color=Cleaner;}
-    else {color = (rank % 2) ? Blue : Purple;}
+    if (rank % 3 == 0 && rank != 0)
+    {
+        color = Cleaner;
+        println("Jestem sprzątaczem");
+    }
+    else
+    {
+        color = (rank % 2) ? Blue : Purple;
+        if (rank % 2)
+        {
+            println("Jestem błękitnym kosmitą");
+        }
+        else
+        {
+            println("Jestem fioletowym kosmitą");
+        }
+    }
 
     pthread_create(&threadKom, NULL, startKomWatek, 0);
     mainLoop();

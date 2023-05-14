@@ -6,7 +6,7 @@ MPI_Datatype MPI_PAKIET_T;
  * w util.h extern state_t stan (czyli zapowiedź, że gdzieś tam jest definicja
  * tutaj w util.c state_t stan (czyli faktyczna definicja)
  */
-state_t stan = InRun;
+state_t stan = Rest;
 
 /* zamek wokół zmiennej współdzielonej między wątkami.
  * Zwróćcie uwagę, że każdy proces ma osobą pamięć, ale w ramach jednego
@@ -15,16 +15,16 @@ state_t stan = InRun;
  */
 pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t lamportMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t queueMut = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t hotelMut = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t guideMut = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t ackMut = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t ackMut_g= PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t ackMut_g = PTHREAD_MUTEX_INITIALIZER;
 
 struct tagNames_t
 {
     const char *name;
     int tag;
-} tagNames[] = {{"pakiet aplikacyjny", APP_PKT}, {"finish", FINISH}, {"potwierdzenie", ACK}, {"prośbę o sekcję krytyczną", REQUEST}, {"zwolnienie sekcji krytycznej", RELEASE}, {"potwierdzenie (guide)", ACK_G},{"prosba o przewodnika", REQUEST_G}, {"Zezwolenie na podroz", RELEASE_G}};
+} tagNames[] = {{"finish", FINISH}, {"potwierdzenie", ACK}, {"prośbę o sekcję krytyczną", REQUEST_H}, {"zwolnienie sekcji krytycznej", RELEASE_H}, {"prosba o przewodnika", REQUEST_G}, {"Zezwolenie na podroz", RELEASE_G}};
 
 const char *const tag2string(int tag)
 {
@@ -47,8 +47,6 @@ void inicjuj_typ_pakietu()
     offsets[1] = offsetof(packet_t, src);
     offsets[2] = offsetof(packet_t, hotelNo);
     offsets[3] = offsetof(packet_t, color);
-
-    
 
     MPI_Type_create_struct(NITEMS, blocklengths, offsets, typy, &MPI_PAKIET_T);
 

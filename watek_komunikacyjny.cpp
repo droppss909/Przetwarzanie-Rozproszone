@@ -18,12 +18,12 @@ void *startKomWatek(void *ptr)
 
         switch (status.MPI_TAG)
         {
-        case REQUEST:
-            // println("dostałem REQUEST[%d] od %d", pakiet.hotelNo, pakiet.src);
-            pthread_mutex_lock(&queueMut);
+        case REQUEST_H:
+            // println("dostałem REQUEST_H[%d] od %d", pakiet.hotelNo, pakiet.src);
+            pthread_mutex_lock(&hotelMut);
             hotelQueues[pakiet.hotelNo].push_back(q_item_t{pakiet.ts, pakiet.color, pakiet.src});
-            std::sort(hotelQueues[pakiet.hotelNo].begin(), hotelQueues[pakiet.hotelNo].end(), cmp);
-            pthread_mutex_unlock(&queueMut);
+            std::sort(hotelQueues[pakiet.hotelNo].begin(), hotelQueues[pakiet.hotelNo].end());
+            pthread_mutex_unlock(&hotelMut);
             sendPacket(0, status.MPI_SOURCE, ACK);
             break;
         case ACK:
@@ -32,11 +32,10 @@ void *startKomWatek(void *ptr)
             // println("Dostałem ACK od %d, mam już %d", status.MPI_SOURCE, ackCount);
             pthread_mutex_unlock(&ackMut);
             break;
-        case RELEASE:
+        case RELEASE_H:
         {
-            // println("Dostałem RELEASE[%d] od [%d]", pakiet.hotelNo, pakiet.src);
-            std::priority_queue<q_item_t> tempQueue;
-            pthread_mutex_lock(&queueMut);
+            // println("Dostałem RELEASE_H[%d] od [%d]", pakiet.hotelNo, pakiet.src);
+            pthread_mutex_lock(&hotelMut);
             for (std::deque<q_item_t>::iterator it = hotelQueues[pakiet.hotelNo].begin(); it != hotelQueues[pakiet.hotelNo].end(); ++it)
             {
                 if (it->rank == pakiet.src)
@@ -45,31 +44,27 @@ void *startKomWatek(void *ptr)
                     break;
                 }
             }
-            pthread_mutex_unlock(&queueMut);
+            pthread_mutex_unlock(&hotelMut);
             break;
         }
         case REQUEST_G:
         {
+            // println("Dostałem REQUEST_G od [%d]", pakiet.src);
             pthread_mutex_lock(&guideMut);
-            guideQueue.push_back(q_item_t{pakiet.ts,pakiet.color, pakiet.src});
+            guideQueue.push_back(q_item_t{pakiet.ts, pakiet.color, pakiet.src});
             std::sort(guideQueue.begin(), guideQueue.end());
             pthread_mutex_unlock(&guideMut);
-            sendPacket(0,status.MPI_SOURCE,ACK_G);
-            break;
-        }
-        case ACK_G:
-        {
-            pthread_mutex_lock(&ackMut_g);
-            ackCount_g++;
-            pthread_mutex_unlock(&ackMut_g);
+            sendPacket(0, status.MPI_SOURCE, ACK);
             break;
         }
         case RELEASE_G:
         {
-            std::priority_queue<q_item_t> tempQueue;
+            // println("Dostałem RELEASE_G od [%d]", pakiet.src);
             pthread_mutex_lock(&guideMut);
-            for(std::deque<q_item_t>::iterator it = guideQueue.begin(); it != guideQueue.end(); ++it){
-                if(it->rank == pakiet.src){
+            for (std::deque<q_item_t>::iterator it = guideQueue.begin(); it != guideQueue.end(); ++it)
+            {
+                if (it->rank == pakiet.src)
+                {
                     guideQueue.erase(it);
                     break;
                 }
@@ -81,4 +76,5 @@ void *startKomWatek(void *ptr)
             break;
         }
     }
+    pthread_exit(NULL);
 }

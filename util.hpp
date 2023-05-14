@@ -24,7 +24,7 @@ struct q_item_t
     bool operator<(const q_item_t &rhs) const
     {
         if (ts != rhs.ts)
-            return ts > rhs.ts;
+            return ts < rhs.ts;
         else
             return rank > rhs.rank;
     }
@@ -35,23 +35,19 @@ typedef struct
 {
     int ts; /* timestamp (zegar lamporta */
     int src;
-    int hotelNo; /* przykładowe pole z danymi; można zmienić nazwę na bardziej pasującą */
+    int hotelNo; /* Numer hotelu, do którego wchodzi proces*/
     color_t color;
-    
+
 } packet_t;
-/* packet_t ma trzy pola, więc NITEMS=3. Wykorzystane w inicjuj_typ_pakietu */
 #define NITEMS 4
 
-/* Typy wiadomości */
 /* TYPY PAKIETÓW */
 #define ACK 1
-#define REQUEST 2
-#define RELEASE 3
-#define ACK_G 4
-#define REQUEST_G 5
-#define RELEASE_G 6
-#define APP_PKT 7
-#define FINISH 8
+#define REQUEST_H 2
+#define RELEASE_H 3
+#define REQUEST_G 4
+#define RELEASE_G 5
+#define FINISH 6
 
 extern MPI_Datatype MPI_PAKIET_T;
 void inicjuj_typ_pakietu();
@@ -61,25 +57,22 @@ void sendPacket(packet_t *pkt, int destination, int tag);
 
 typedef enum
 {
-    InRun,
-    InMonitor,
-    InWant,
-    InSection,
-    InFinish,
     Rest,
     WaitHotel,
+    InHotel,
+    InFinish,
     WaitGuide,
     Trip,
     Cleaning
 } state_t;
 
 extern state_t stan;
+
 extern pthread_mutex_t stateMut;
 extern pthread_mutex_t lamportMut;
-extern pthread_mutex_t queueMut;
+extern pthread_mutex_t hotelMut;
 extern pthread_mutex_t guideMut;
 extern pthread_mutex_t ackMut;
-extern pthread_mutex_t ackMut_g;
 
 void changeState(state_t);
 int cmp(q_item_t const &lhs, q_item_t const &rhs);
