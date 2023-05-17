@@ -43,15 +43,24 @@ void mainLoop()
 
 			std::unique_lock<std::mutex> hotelLock{
 				hotelMut};
-			hotelCond.wait(hotelLock, [&]()
-						   {
-							   for (unsigned long i = 0; i < hotelQueues[hotelNo].size() && i < R; i++)
-								   if (hotelQueues[hotelNo].at(i).rank == rank)
-									   return true;
-								   else if (hotelQueues[hotelNo].at(i).color != color)
-									   return false;
+			if (color!= Cleaner){
+				hotelCond.wait(hotelLock, [&]()
+							{
+								for (unsigned long i = 0; i < hotelQueues[hotelNo].size() && i < R; i++)
+									if (hotelQueues[hotelNo].at(0).color!= Cleaner && hotelQueues[hotelNo].at(i).rank == rank)
+										return true;
+									else if (hotelQueues[hotelNo].at(i).color!=Cleaner && hotelQueues[hotelNo].at(i).color != color)
+										return false;
 
-							   return false; });
+								return false; });
+			}
+			else{
+				hotelCond.wait(hotelLock, [&]()
+							{
+								if (hotelQueues[hotelNo].at(0).rank==rank){
+								return true;
+								}});
+			}
 
 			if (color == Cleaner)
 				changeState(Cleaning);
