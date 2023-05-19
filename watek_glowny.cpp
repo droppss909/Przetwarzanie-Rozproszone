@@ -57,9 +57,8 @@ void mainLoop()
 			else{
 				hotelCond.wait(hotelLock, [&]()
 							{
-								if (hotelQueues[hotelNo].at(0).rank==rank){
-								return true;
-								}});
+								return  hotelQueues[hotelNo].at(0).rank==rank;
+							});
 			}
 
 			if (color == Cleaner)
